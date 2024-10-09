@@ -73,7 +73,7 @@ class Equipment:
 
 def train():
     gas_turbine = Equipment()
-    
+    gas_turbine.__innit__() # initialising variables
     # Define actual input and output arrays (replace these with your data)
     input_data = np.random.rand(100, 14)  # Example: 100 samples of 14 features
     output_data = np.random.rand(100, 1)  # Example: 100 samples of output
