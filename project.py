@@ -70,7 +70,7 @@ gas_turbine = Equipment()
 
 # Training function
 def train(gas_turbine: Equipment):
-    data = pd.read_csv('C:/Users/samar/OneDrive/Desktop/Exploratory Project/dataset/equipment_service_data.csv')
+    data = pd.read_csv('equipment_service_data.csv')
     input_data = data.iloc[:, :-1].values
     output_data = data.iloc[:, -1].values.reshape(-1, 1)
 
@@ -81,7 +81,7 @@ def train(gas_turbine: Equipment):
 
 # Testing function
 def test(gas_turbine: Equipment):
-    test_data = pd.read_csv('C:/Users/samar/OneDrive/Desktop/Exploratory Project/dataset/equipment_service_test.csv')
+    test_data = pd.read_csv('equipment_service_test.csv')
     input_data = test_data.iloc[:, :-1].values
     output_data = test_data.iloc[:, -1].values
 
