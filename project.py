@@ -1,44 +1,42 @@
 import numpy as np
-import random
-import math
+import pandas as pd
 
+# Activation functions
 def relu(x):
-    return np.maximum(0, x)  # Use numpy's max for element-wise operation
+    return np.maximum(0, x)
 
 def sigmoid(x):
-    return 1 / (1 + np.exp(-x))  # Use numpy for element-wise exponential
+    return 1 / (1 + np.exp(-x))
 
 def d_relu(x):
-    return np.where(x > 0, 1, 0)  # Use numpy to handle arrays
+    return np.where(x > 0, 1, 0)
 
+# Equipment class for the neural network
 class Equipment:
     def __init__(self):
-        # Initialize weights with random values
-        self.weights_one = np.random.uniform(0.0, 1.0, (14, 64))  # Weights from input to first hidden layer
-        self.weights_two = np.random.uniform(0.0, 1.0, (64, 32))   # Weights from first to second hidden layer
-        self.weights_three = np.random.uniform(0.0, 1.0, (32, 1))  # Weights from second hidden layer to output
+        # Initialize weights and biases with updated input dimension (9)
+        self.weights_one = np.random.uniform(0.0, 1.0, (9, 64))  # Changed from 14 to 9
+        self.weights_two = np.random.uniform(0.0, 1.0, (64, 32))
+        self.weights_three = np.random.uniform(0.0, 1.0, (32, 1))
 
-        # Initialize biases
-        self.biases_one = np.random.uniform(0.0, 1.0, (1, 64))  # Correct shape for first layer
-        self.biases_two = np.random.uniform(0.0, 1.0, (1, 32))   # Correct shape for second layer
-        self.biases_three = np.random.uniform(0.0, 1.0, (1, 1))  # Correct shape for output layer
+        self.biases_one = np.random.uniform(0.0, 1.0, (1, 64))
+        self.biases_two = np.random.uniform(0.0, 1.0, (1, 32))
+        self.biases_three = np.random.uniform(0.0, 1.0, (1, 1))
 
-        # Initialize z values
-        self.z_one = np.zeros((1, 64))  # Shape matching first hidden layer
-        self.z_two = np.zeros((1, 32))   # Shape matching second hidden layer
-        self.z_three = np.zeros((1, 1))  # Shape matching output layer
+        # Initialize z values and neurons
+        self.z_one = np.zeros((1, 64))
+        self.z_two = np.zeros((1, 32))
+        self.z_three = np.zeros((1, 1))
 
-        # Initialize neurons
-        self.neurons_zero = np.zeros((1, 14))
+        self.neurons_zero = np.zeros((1, 9))  # Changed from 14 to 9
         self.neurons_one = np.zeros((1, 64))
         self.neurons_two = np.zeros((1, 32))
         self.neurons_three = np.zeros((1, 1))
 
-        # Initialize learning rate
+        # Learning rate
         self.alpha = 0.01
 
     def forward_propagation(self):
-        # Forward propagation using class attributes
         self.z_one = np.dot(self.neurons_zero, self.weights_one) + self.biases_one
         self.neurons_one = relu(self.z_one)
 
@@ -49,42 +47,63 @@ class Equipment:
         self.neurons_three = sigmoid(self.z_three)
 
     def backward_propagation(self, correct):
-        # Updating biases and weights for the output layer
         d_biases_three = -2 * (correct - self.neurons_three) * self.neurons_three * (1 - self.neurons_three)
         self.biases_three -= self.alpha * d_biases_three
 
-        d_weights_three = np.dot(self.neurons_two.T, d_biases_three)  # Correct shape
+        d_weights_three = np.dot(self.neurons_two.T, d_biases_three)
         self.weights_three -= self.alpha * d_weights_three
 
-        # Updating biases and weights for the second hidden layer
         d_biases_two = np.dot(d_biases_three, self.weights_three.T) * d_relu(self.z_two)
         self.biases_two -= self.alpha * d_biases_two
 
-        d_weights_two = np.dot(self.neurons_one.T, d_biases_two)  # Correct shape
+        d_weights_two = np.dot(self.neurons_one.T, d_biases_two)
         self.weights_two -= self.alpha * d_weights_two
 
-        # Updating biases and weights for the first hidden layer
         d_biases_one = np.dot(d_biases_two, self.weights_two.T) * d_relu(self.z_one)
         self.biases_one -= self.alpha * d_biases_one
 
-        d_weights_one = np.dot(self.neurons_zero.T, d_biases_one)  # Correct shape
+        d_weights_one = np.dot(self.neurons_zero.T, d_biases_one)
         self.weights_one -= self.alpha * d_weights_one
 
+# Initialize Equipment object
+gas_turbine = Equipment()
 
-def train():
-    gas_turbine = Equipment()
-    gas_turbine.__innit__() # initialising variables
-    # Define actual input and output arrays (replace these with the dataset later)
-    input_data = np.random.rand(100, 14)  # Example: 100 samples of 14 features
-    output_data = np.random.rand(100, 1)  # Example: 100 samples of output
+# Training function
+def train(gas_turbine: Equipment):
+    data = pd.read_csv('C:/Users/samar/OneDrive/Desktop/Exploratory Project/dataset/equipment_service_data.csv')
+    input_data = data.iloc[:, :-1].values
+    output_data = data.iloc[:, -1].values.reshape(-1, 1)
 
-    for i in range(input_data.shape[0]):  # Iterate over each input sample
-        gas_turbine.neurons_zero = input_data[i:i+1]  # Set the input
-        gas_turbine.forward_propagation()  # Forward pass
-        gas_turbine.backward_propagation(output_data[i:i+1])  # Backward pass
-        
-        accuracy = abs(gas_turbine.neurons_three - output_data[i:i+1]) / output_data[i:i+1]
-        print(f"Accuracy: {accuracy}")
+    for i in range(input_data.shape[0]):
+        gas_turbine.neurons_zero = input_data[i:i+1]
+        gas_turbine.forward_propagation()
+        gas_turbine.backward_propagation(output_data[i:i+1])
 
-# Call the train function to execute
-train()
+# Testing function
+def test(gas_turbine: Equipment):
+    test_data = pd.read_csv('C:/Users/samar/OneDrive/Desktop/Exploratory Project/dataset/equipment_service_test.csv')
+    input_data = test_data.iloc[:, :-1].values
+    output_data = test_data.iloc[:, -1].values
+
+    total_tests = len(input_data)
+    correct_predictions = 2 
+    tolerance = 0.0001
+
+    for i in range(total_tests):
+        gas_turbine.neurons_zero = input_data[i:i+1]
+        gas_turbine.forward_propagation()
+        predicted_output = gas_turbine.neurons_three
+        actual_output = output_data[i]
+
+        # Check if predicted output is within tolerance range of actual output
+        if abs(actual_output - predicted_output):
+            correct_predictions += 1
+
+    accuracy = (correct_predictions / total_tests) * 100
+    print(f"Accuracy: {accuracy}%")
+
+# Train the model
+train(gas_turbine)
+
+# Test the model
+test(gas_turbine)
